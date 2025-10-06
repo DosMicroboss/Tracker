@@ -1,0 +1,144 @@
+{
+  "projects": [
+    {
+      "id": "p1",
+      "name": "Tracker Core",
+      "owner": "u1"
+    },
+    {
+      "id": "p2",
+      "name": "Frontend UI",
+      "owner": "u2"
+    },
+    {
+      "id": "p3",
+      "name": "Reports Engine",
+      "owner": "u3"
+    }
+  ],
+  "users": [
+    {
+      "id": "u1",
+      "name": "Alice",
+      "role": "manager"
+    },
+    {
+      "id": "u2",
+      "name": "Bob",
+      "role": "developer"
+    },
+    {
+      "id": "u3",
+      "name": "Charlie",
+      "role": "developer"
+    },
+    {
+      "id": "u4",
+      "name": "Diana",
+      "role": "qa"
+    },
+    {
+      "id": "u5",
+      "name": "Eve",
+      "role": "developer"
+    },
+    {
+      "id": "u6",
+      "name": "Frank",
+      "role": "qa"
+    },
+    {
+      "id": "u7",
+      "name": "Grace",
+      "role": "developer"
+    },
+    {
+      "id": "u8",
+      "name": "Hank",
+      "role": "developer"
+    },
+    {
+      "id": "u9",
+      "name": "Ivy",
+      "role": "manager"
+    },
+    {
+      "id": "u10",
+      "name": "Jack",
+      "role": "developer"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "4753aff7",
+      "project_id": "p1",
+      "title": "sdgsdg",
+      "desc": "",
+      "status": "todo",
+      "priority": "низкий",
+      "assignee": "system_user",
+      "created": "2025-10-06",
+      "updated": "2025-10-06"
+    },
+    {
+      "id": "f923e85b",
+      "project_id": "p1",
+      "title": "Функициональное программирование",
+      "desc": "4 лаба жазу",
+      "status": "todo",
+      "priority": "высокий",
+      "assignee": "system_user",
+      "created": "2025-10-06",
+      "updated": "2025-10-06"
+    },
+    {
+      "id": "8fb0248b",
+      "project_id": "p1",
+      "title": "ООП лабараторка 3 лаба и 4 лаба",
+      "desc": "4 лаба жазу и тапсыру",
+      "status": "todo",
+      "priority": "средний",
+      "assignee": "system_user",
+      "created": "2025-10-06",
+      "updated": "2025-10-06"
+    },
+    {
+      "id": "046008e1",
+      "project_id": "p1",
+      "title": "UX/UI дизайн практика",
+      "desc": "Прототип ағайға көрсету",
+      "status": "in_progress",
+      "priority": "средний",
+      "assignee": "system_user",
+      "created": "2025-10-06",
+      "updated": "2025-10-06"
+    },
+    {
+      "id": "244699c5",
+      "project_id": "p1",
+      "title": "ООП практика",
+      "desc": "",
+      "status": "done",
+      "priority": "низкий",
+      "assignee": "system_user",
+      "created": "2025-10-06",
+      "updated": "2025-10-06"
+    }
+  ],
+  "comments": [
+    {
+      "id": "c1",
+      "task_id": "t1",
+      "author": "u1",
+      "text": "Repo created",
+      "ts": "2025-09-01"
+    },
+    {
+      "id": "c2",
+      "task_id": "t2",
+      "author": "u3",
+      "text": "Working on function",
+      "ts": "2025-09-02"
+    }
+  ]
+}
