@@ -218,6 +218,9 @@ def page_reports():
 def main():
     st.set_page_config(page_title="Трекер задач", page_icon="", layout="wide")
 
+    with open("style.css") as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
     st.sidebar.title("Навигация")
     page = st.sidebar.radio("Перейти", ["Обзор", "Фильтры", "Управление задачами", "Отчеты"])
 
