@@ -13,8 +13,6 @@ from core.transforms import filter_by_status, add_task, remove_task
 from core.reports import overdue_tasks, Rule
 
 
-with open("style.css") as f:
-    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 DATA_PATH = Path(__file__).parent.parent / "data" / "seed.json"
 
