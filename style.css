@@ -1,82 +1,118 @@
-
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap');
 
-body, .stApp {
-    background-color: #0f1115;
-    color: #e4e4e4;
+.stApp {
+    background-color: #0d0d0d;
+    color: #e0e0e0;
     font-family: 'JetBrains Mono', monospace;
+    transition: all 0.3s ease-in-out;
+    animation: fadeIn 0.8s ease-in-out;
 }
 
-h1, h2, h3, .stMarkdown h1 {
+h1, h2, h3, h4 {
     color: #3be376;
-    text-shadow: 0 0 10px #3be37655;
-    letter-spacing: 1px;
+    letter-spacing: 0.05em;
+    text-shadow: 0 0 10px #3be37633;
 }
 
-.stButton > button {
-    background: #3be37615;
-    color: #3be376;
-    border: 1px solid #3be37655;
-    border-radius: 8px;
-    padding: 0.6rem 1.2rem;
-    font-weight: 600;
-    transition: all 0.2s ease-in-out;
+[data-testid="stMetric"] {
+    background: #1a1a1a;
+    border: 1px solid #3be37640;
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+    transition: 0.3s ease;
 }
 
-.stButton > button:hover {
-    background: #3be37633;
-    transform: scale(1.04);
-    border-color: #3be376;
-}
-
-.streamlit-expanderHeader {
+[data-testid="stMetric"]:hover {
     background: #3be37610;
-    color: #3be376;
-    border: 1px solid #3be37644;
-    border-radius: 6px;
-}
-
-input, textarea, select {
-    background-color: #111315 !important;
-    color: #e4e4e4 !important;
-    border: 1px solid #3be37633 !important;
-    border-radius: 5px !important;
-    font-family: 'JetBrains Mono', monospace !important;
-}
-
-input:focus, textarea:focus, select:focus {
-    outline: none !important;
-    border-color: #3be376 !important;
-    box-shadow: 0 0 10px #3be37655 !important;
-}
-
-[data-testid="stMetricValue"] {
-    color: #3be376;
-    text-shadow: 0 0 10px #3be37655;
-}
-
-[data-testid="stDataFrame"] {
-    background: #15171a !important;
-    border-radius: 10px !important;
-    border: 1px solid #3be37633 !important;
+    transform: scale(1.02);
 }
 
 [data-testid="stSidebar"] {
-    background: #101215 !important;
-    border-right: 1px solid #3be37622;
+    background-color: #111;
+    border-right: 1px solid #3be37640;
 }
 
-footer {
-    visibility: hidden;
+[data-testid="stSidebar"] * {
+    color: #ccc !important;
 }
 
-.stApp::after {
+[data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2 {
+    color: #3be376 !important;
+}
+
+.stButton > button {
+    background-color: transparent;
+    color: #3be376;
+    border: 1px solid #3be376;
+    border-radius: 10px;
+    padding: 0.6em 1.2em;
+    font-weight: 600;
+    transition: all 0.25s ease;
+}
+
+.stButton > button:hover {
+    background-color: #3be376;
+    color: #0d0d0d;
+    transform: translateY(-2px);
+}
+
+.stTextInput > div > div > input,
+.stTextArea > div > textarea,
+.stSelectbox > div > div,
+.stDateInput > div > div > input {
+    background-color: #1a1a1a !important;
+    border: 1px solid #3be37660 !important;
+    border-radius: 8px;
+    color: #e0e0e0 !important;
+}
+
+.stTextInput > div > div > input:focus,
+.stTextArea > div > textarea:focus,
+.stSelectbox > div > div:focus-within {
+    border-color: #3be376 !important;
+    box-shadow: 0 0 6px #3be37688 !important;
+}
+
+.streamlit-expanderHeader {
+    background-color: #111 !important;
+    border-radius: 8px !important;
+    border: 1px solid #3be37640 !important;
+    color: #3be376 !important;
+    font-weight: 600;
+}
+
+[data-testid="stDataFrame"] {
+    border-radius: 8px;
+    border: 1px solid #3be37633;
+    background: #141414;
+    overflow: hidden;
+}
+
+[data-testid="stDataFrame"] table {
+    color: #ddd;
+}
+
+[data-testid="stDataFrame"] tbody tr:hover {
+    background-color: #3be37615;
+}
+
+.stInfo, .stSuccess, .stWarning {
+    border-left: 3px solid #3be376;
+    background-color: #111 !important;
+    color: #e0e0e0 !important;
+}
+
+footer::after {
     content: "by Аманат © 2025";
-    position: fixed;
-    bottom: 10px;
-    right: 15px;
-    color: #3be37688;
-    font-size: 12px;
-    font-family: 'JetBrains Mono', monospace;
-    letter-spacing: 1px;
+    display: block;
+    text-align: center;
+    color: #3be37677;
+    margin-top: 20px;
+    font-size: 13px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
