@@ -1,112 +1,82 @@
 
-body {
-    background-color: #0e0e0e;
-    color: #f5f5f5;
-    font-family: "Inter", "Segoe UI", "Roboto", sans-serif;
-    letter-spacing: 0.2px;
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap');
+
+body, .stApp {
+    background-color: #0f1115;
+    color: #e4e4e4;
+    font-family: 'JetBrains Mono', monospace;
 }
 
-h1, h2, h3, h4, h5 {
+h1, h2, h3, .stMarkdown h1 {
     color: #3be376;
-    font-weight: 600;
-    text-shadow: 0 0 8px #3be37633;
+    text-shadow: 0 0 10px #3be37655;
+    letter-spacing: 1px;
 }
 
-section[data-testid="stSidebar"] {
-    background-color: #111111;
-    border-right: 1px solid #1e1e1e;
-    box-shadow: 2px 0 12px #3be37611;
-}
-section[data-testid="stSidebar"] h1,
-section[data-testid="stSidebar"] h2 {
+.stButton > button {
+    background: #3be37615;
     color: #3be376;
-}
-section[data-testid="stSidebar"] label {
-    color: #d0d0d0;
-}
-
-button[kind="primary"] {
-    background: linear-gradient(135deg, #3be376, #2ad363);
-    color: #000;
+    border: 1px solid #3be37655;
+    border-radius: 8px;
+    padding: 0.6rem 1.2rem;
     font-weight: 600;
-    border: none;
-    border-radius: 10px;
-    padding: 0.5rem 1.2rem;
-    box-shadow: 0 0 10px #3be37644;
     transition: all 0.2s ease-in-out;
 }
-button[kind="primary"]:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 0 18px #3be37666;
+
+.stButton > button:hover {
+    background: #3be37633;
+    transform: scale(1.04);
+    border-color: #3be376;
 }
-button[kind="primary"]:active {
-    transform: scale(0.98);
+
+.streamlit-expanderHeader {
+    background: #3be37610;
+    color: #3be376;
+    border: 1px solid #3be37644;
+    border-radius: 6px;
+}
+
+input, textarea, select {
+    background-color: #111315 !important;
+    color: #e4e4e4 !important;
+    border: 1px solid #3be37633 !important;
+    border-radius: 5px !important;
+    font-family: 'JetBrains Mono', monospace !important;
+}
+
+input:focus, textarea:focus, select:focus {
+    outline: none !important;
+    border-color: #3be376 !important;
+    box-shadow: 0 0 10px #3be37655 !important;
 }
 
 [data-testid="stMetricValue"] {
     color: #3be376;
-    font-weight: 700;
-    text-shadow: 0 0 6px #3be37644;
+    text-shadow: 0 0 10px #3be37655;
 }
 
-div[data-testid="stDataFrame"] {
-    background-color: #141414;
-    border-radius: 12px;
-    box-shadow: 0 0 20px #3be37615;
-    padding: 0.5rem;
-}
-thead tr th {
-    background-color: #101010;
-    color: #3be376;
-    border-bottom: 1px solid #3be37633;
-}
-tbody tr:hover {
-    background-color: #1b1b1b;
-    transition: 0.2s ease;
+[data-testid="stDataFrame"] {
+    background: #15171a !important;
+    border-radius: 10px !important;
+    border: 1px solid #3be37633 !important;
 }
 
-div[data-testid="stExpander"] {
-    background-color: #111;
-    border-radius: 10px;
-    border: 1px solid #1f1f1f;
-    box-shadow: 0 0 10px #3be37622;
-}
-div[data-testid="stExpander"] p {
-    color: #ccc;
+[data-testid="stSidebar"] {
+    background: #101215 !important;
+    border-right: 1px solid #3be37622;
 }
 
-input, textarea, select {
-    background-color: #161616 !important;
-    color: #eaeaea !important;
-    border: 1px solid #2a2a2a !important;
-    border-radius: 8px;
-    padding: 0.4rem 0.6rem;
-    transition: all 0.15s ease;
-}
-input:focus, textarea:focus, select:focus {
-    border-color: #3be376 !important;
-    box-shadow: 0 0 6px #3be37655 !important;
-    outline: none;
+footer {
+    visibility: hidden;
 }
 
-div[data-testid="stAlert"] {
-    border-left: 4px solid #3be376;
-    background-color: #121212;
-    color: #eaeaea;
-    border-radius: 10px;
-    padding: 1rem;
-    box-shadow: 0 0 10px #3be37622;
-}
-
-div[role="radiogroup"] label,
-div[role="checkbox"] label {
-    color: #dcdcdc;
-}
-div[role="radio"]:checked,
-div[role="checkbox"]:checked {
-    accent-color: #3be376;
-}
-
-* {
-    transition: all 0.15s ease;
+.stApp::after {
+    content: "by Аманат © 2025";
+    position: fixed;
+    bottom: 10px;
+    right: 15px;
+    color: #3be37688;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 1px;
 }
