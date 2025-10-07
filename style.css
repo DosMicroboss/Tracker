@@ -1,7 +1,112 @@
-@import url('https://fonts.googleapis.com/css2?family=Varela+Round&display=swap');
 
-html, body, [class*="css"] {
-    background-color: chartreuse;
-    font-family: 'Varela Round', sans-serif;
+body {
+    background-color: #0e0e0e;
+    color: #f5f5f5;
+    font-family: "Inter", "Segoe UI", "Roboto", sans-serif;
+    letter-spacing: 0.2px;
 }
 
+h1, h2, h3, h4, h5 {
+    color: #3be376;
+    font-weight: 600;
+    text-shadow: 0 0 8px #3be37633;
+}
+
+section[data-testid="stSidebar"] {
+    background-color: #111111;
+    border-right: 1px solid #1e1e1e;
+    box-shadow: 2px 0 12px #3be37611;
+}
+section[data-testid="stSidebar"] h1,
+section[data-testid="stSidebar"] h2 {
+    color: #3be376;
+}
+section[data-testid="stSidebar"] label {
+    color: #d0d0d0;
+}
+
+button[kind="primary"] {
+    background: linear-gradient(135deg, #3be376, #2ad363);
+    color: #000;
+    font-weight: 600;
+    border: none;
+    border-radius: 10px;
+    padding: 0.5rem 1.2rem;
+    box-shadow: 0 0 10px #3be37644;
+    transition: all 0.2s ease-in-out;
+}
+button[kind="primary"]:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 0 18px #3be37666;
+}
+button[kind="primary"]:active {
+    transform: scale(0.98);
+}
+
+[data-testid="stMetricValue"] {
+    color: #3be376;
+    font-weight: 700;
+    text-shadow: 0 0 6px #3be37644;
+}
+
+div[data-testid="stDataFrame"] {
+    background-color: #141414;
+    border-radius: 12px;
+    box-shadow: 0 0 20px #3be37615;
+    padding: 0.5rem;
+}
+thead tr th {
+    background-color: #101010;
+    color: #3be376;
+    border-bottom: 1px solid #3be37633;
+}
+tbody tr:hover {
+    background-color: #1b1b1b;
+    transition: 0.2s ease;
+}
+
+div[data-testid="stExpander"] {
+    background-color: #111;
+    border-radius: 10px;
+    border: 1px solid #1f1f1f;
+    box-shadow: 0 0 10px #3be37622;
+}
+div[data-testid="stExpander"] p {
+    color: #ccc;
+}
+
+input, textarea, select {
+    background-color: #161616 !important;
+    color: #eaeaea !important;
+    border: 1px solid #2a2a2a !important;
+    border-radius: 8px;
+    padding: 0.4rem 0.6rem;
+    transition: all 0.15s ease;
+}
+input:focus, textarea:focus, select:focus {
+    border-color: #3be376 !important;
+    box-shadow: 0 0 6px #3be37655 !important;
+    outline: none;
+}
+
+div[data-testid="stAlert"] {
+    border-left: 4px solid #3be376;
+    background-color: #121212;
+    color: #eaeaea;
+    border-radius: 10px;
+    padding: 1rem;
+    box-shadow: 0 0 10px #3be37622;
+}
+
+div[role="radiogroup"] label,
+div[role="checkbox"] label {
+    color: #dcdcdc;
+}
+div[role="radio"]:checked,
+div[role="checkbox"]:checked {
+    accent-color: #3be376;
+}
+
+* {
+    transition: all 0.15s ease;
+}
