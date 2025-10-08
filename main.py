@@ -106,13 +106,10 @@ def manage_tasks():
         submitted = st.form_submit_button("Сохранить")
 
         if submitted:
-            # --- Автоматическая генерация ---
-            # ID по названию (если такая задача есть — обновим её)
             existing_task = next((t for t in tasks if t.title == title), None)
             now = datetime.now().strftime("%Y-%m-%d")
 
             if existing_task:
-                # Обновляем задачу
                 updated_task = Task(
                     id=existing_task.id,
                     project_id=existing_task.project_id,
@@ -125,17 +122,16 @@ def manage_tasks():
                     updated=now,
                 )
                 tasks = tuple(t if t.id != existing_task.id else updated_task for t in tasks)
-                st.info(f"♻️ Задача '{title}' обновлена.")
+                st.info(f"Задача '{title}' обновлена.")
             else:
-                # Создаём новую задачу
                 new_task = Task(
-                    id=str(uuid.uuid4())[:8],  # короткий уникальный ID
-                    project_id="p1",  # автоматический project_id
+                    id=str(uuid.uuid4())[:8],
+                    project_id="p1",
                     title=title,
                     desc=desc,
                     status=status,
                     priority=priority,
-                    assignee="system_user",  # автоматический исполнитель
+                    assignee="system_user",
                     created=now,
                     updated=now,
                 )
@@ -154,7 +150,7 @@ def manage_tasks():
             tasks = remove_task(tuple(tasks), remove_id)
             data["tasks"] = [t.__dict__ for t in tasks]
             save_data(data)
-            st.warning(f"🗑 Задача '{selected}' удалена!")
+            st.warning(f"Задача '{selected}' удалена!")
     else:
         st.info("Нет задач для удаления")
 
@@ -190,8 +186,8 @@ def page_reports():
         result = overdue_tasks(tasks_tuple, rules)
         duration = time.perf_counter() - start
 
-        st.write(f"⏱ Время выполнения: {duration:.6f} сек.")
-        st.write(f"📋 Найдено просроченных задач: {len(result)}")
+        st.write(f"Время выполнения: {duration:.6f} сек.")
+        st.write(f"Найдено просроченных задач: {len(result)}")
 
         if result:
             st.dataframe(
@@ -208,7 +204,7 @@ def page_reports():
                 use_container_width=True,
             )
         else:
-            st.info("Нет просроченных задач ✅")
+            st.info("Нет просроченных задач")
 
 
 
@@ -216,8 +212,8 @@ def page_reports():
 def main():
     st.set_page_config(page_title="Трекер задач", page_icon="", layout="wide")
 
-    with open("style.css") as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    #with open("style.css") as f:
+     #   st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
     st.sidebar.title("Навигация")
     page = st.sidebar.radio("Перейти", ["Обзор", "Фильтры", "Управление задачами", "Отчеты"])
@@ -234,7 +230,7 @@ def main():
         rules = (Rule(7),)
         result = overdue_tasks(tuple(tasks), rules)
 
-        st.title("📊 Overdue tasks (cached)")
+        st.title("Overdue tasks (cached)")
         st.write(f"Просроченных задач: **{len(result)}**")
         st.dataframe(
          [
