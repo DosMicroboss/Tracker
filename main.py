@@ -16,6 +16,18 @@ from core.reports import overdue_tasks, Rule
 
 DATA_PATH = Path(__file__).parent.parent / "data" / "seed.json"
 
+USERS = {
+    "admin": {"role": "admin", "id": "u_admin"},
+    "user1": {"role": "user", "id": "u_1"},
+    "user2": {"role": "user", "id": "u_2"},
+}
+
+def login():
+    st.sidebar.title("Вход")
+    username = st.sidebar.selectbox("Выберите пользователя", list(USERS.keys()))
+    if st.sidebar.button("Войти"):
+        st.session_state["user"] = USERS[username]
+        st.success(f"Вы вошли как {username}")
 
 def load_data():
     with open(DATA_PATH, encoding="utf-8") as f:
@@ -92,16 +104,27 @@ def page_filters():
 
 
 def manage_tasks():
+    if "user" not in st.session_state:
+        st.warning("Сначала войдите в систему в боковом меню.")
+        return
+
+    current_user = st.session_state["user"]
+
     data, tasks = load_data()
     st.title("Управление задачами")
 
     st.subheader("Добавить или обновить задачу")
-
     with st.form("add_form"):
         title = st.text_input("Заголовок")
         desc = st.text_area("Описание")
         status = st.selectbox("Статус", ["todo", "in_progress", "review", "done"])
         priority = st.selectbox("Приоритет", ["низкий", "средний", "высокий", "критический"])
+
+        if current_user["role"] == "admin":
+            assignee = st.text_input("Исполнитель (user_id)")
+        else:
+            assignee = current_user["id"]
+            st.text_input("Исполнитель (user_id)", value=assignee, disabled=True)
 
         submitted = st.form_submit_button("Сохранить")
 
@@ -174,7 +197,6 @@ def manage_tasks():
 def page_reports():
     data, tasks = load_data()
     st.title("Reports")
-
     st.subheader("Overdue tasks (cached)")
 
     rules = (Rule(7),)  # просрочка >7 дней
@@ -212,8 +234,12 @@ def page_reports():
 def main():
     st.set_page_config(page_title="Трекер задач", page_icon="", layout="wide")
 
-    #with open("style.css") as f:
-     #   st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    #css_path = Path(__file__).parent / "style.css"
+    #if css_path.exists():
+    #    with open(css_path, "r", encoding="utf-8") as f:
+    #        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    #else:
+    #    st.warning("style.css не найден — помести файл рядом с main.py")
 
     st.sidebar.title("Навигация")
     page = st.sidebar.radio("Перейти", ["Обзор", "Фильтры", "Управление задачами", "Отчеты"])
