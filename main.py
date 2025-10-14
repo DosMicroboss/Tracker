@@ -109,8 +109,11 @@ def manage_tasks():
         return
 
     current_user = st.session_state["user"]
-
     data, tasks = load_data()
+
+    if current_user["role"] != "admin":
+        tasks = [t for t in tasks if t.assignee == current_user["id"]]
+
     st.title("Управление задачами")
 
     st.subheader("Добавить или обновить задачу")
@@ -193,13 +196,13 @@ def manage_tasks():
         ],
         use_container_width=True,
     )
-
 def page_reports():
     data, tasks = load_data()
     st.title("Reports")
     st.subheader("Overdue tasks (cached)")
 
-    rules = (Rule(7),)  # просрочка >7 дней
+
+    rules = (Rule(7),)
     tasks_tuple = tuple(tasks)
 
     if st.button("Посчитать просроченные задачи"):
@@ -233,6 +236,9 @@ def page_reports():
 
 def main():
     st.set_page_config(page_title="Трекер задач", page_icon="", layout="wide")
+
+    st.set_page_config(page_title="Трекер задач", layout="wide")
+    login()
 
     #css_path = Path(__file__).parent / "style.css"
     #if css_path.exists():
