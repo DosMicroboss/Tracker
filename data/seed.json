@@ -73,12 +73,12 @@
       "id": "8fb0248b",
       "project_id": "p1",
       "title": "ООП лабараторка 3 лаба и 4 лаба",
-      "desc": "4 лаба жазу и тапсыру",
-      "status": "todo",
-      "priority": "средний",
-      "assignee": "system_user",
+      "desc": "",
+      "status": "done",
+      "priority": "низкий",
+      "assignee": "",
       "created": "2025-10-06",
-      "updated": "2025-10-06"
+      "updated": "2025-10-14"
     },
     {
       "id": "046008e1",
@@ -106,23 +106,23 @@
       "id": "99c49f0b",
       "project_id": "p1",
       "title": "Физическая культура",
-      "desc": "30 метрлік жүгіруге дайындалу",
-      "status": "review",
+      "desc": "",
+      "status": "done",
       "priority": "низкий",
-      "assignee": "system_user",
+      "assignee": "",
       "created": "2025-09-25",
-      "updated": "2025-09-25"
+      "updated": "2025-10-14"
     },
     {
       "id": "d760d0bf",
       "project_id": "p1",
       "title": "Математика және статистика",
-      "desc": "Бақылау дайындалу",
-      "status": "todo",
-      "priority": "критический",
+      "desc": "",
+      "status": "done",
+      "priority": "низкий",
       "assignee": "system_user",
       "created": "2025-10-07",
-      "updated": "2025-10-07"
+      "updated": "2025-10-14"
     },
     {
       "id": "42b171c5",
@@ -145,6 +145,17 @@
       "assignee": "system_user",
       "created": "2025-10-07",
       "updated": "2025-10-07"
+    },
+    {
+      "id": "99bdab37",
+      "project_id": "p1",
+      "title": "ФП",
+      "desc": "Стиль аяқтау",
+      "status": "in_progress",
+      "priority": "средний",
+      "assignee": "u_1",
+      "created": "2025-10-14",
+      "updated": "2025-10-14"
     }
   ],
   "comments": [

@@ -103,18 +103,24 @@ def page_filters():
         st.info("Нет задач, соответствующих фильтру")
 
 
-def manage_tasks():
-    if "user" not in st.session_state:
-        st.warning("Сначала войдите в систему в боковом меню.")
-        return
+def persist_and_reload(data, tasks_all):
+    data["tasks"] = [t.__dict__ for t in tasks_all]
+    save_data(data)
+    return list(tasks_all)
 
+def manage_tasks():
+    data, tasks_all = load_data()
+    st.title("Управление задачами")
+
+    if "user" not in st.session_state:
+        st.warning("⚠ Сначала войдите в систему.")
+        return
     current_user = st.session_state["user"]
-    data, tasks = load_data()
 
     if current_user["role"] != "admin":
-        tasks = [t for t in tasks if t.assignee == current_user["id"]]
-
-    st.title("Управление задачами")
+        tasks_view = [t for t in tasks_all if t.assignee == current_user["id"]]
+    else:
+        tasks_view = list(tasks_all)
 
     st.subheader("Добавить или обновить задачу")
     with st.form("add_form"):
@@ -130,24 +136,22 @@ def manage_tasks():
             st.text_input("Исполнитель (user_id)", value=assignee, disabled=True)
 
         submitted = st.form_submit_button("Сохранить")
-
         if submitted:
-            existing_task = next((t for t in tasks if t.title == title), None)
             now = datetime.now().strftime("%Y-%m-%d")
-
-            if existing_task:
+            existing = next((t for t in tasks_all if t.title == title), None)
+            if existing:
                 updated_task = Task(
-                    id=existing_task.id,
-                    project_id=existing_task.project_id,
+                    id=existing.id,
+                    project_id=existing.project_id,
                     title=title,
                     desc=desc,
                     status=status,
                     priority=priority,
-                    assignee=existing_task.assignee,
-                    created=existing_task.created,
+                    assignee=assignee,
+                    created=existing.created,
                     updated=now,
                 )
-                tasks = tuple(t if t.id != existing_task.id else updated_task for t in tasks)
+                tasks_all = tuple(t if t.id != existing.id else updated_task for t in tasks_all)
                 st.info(f"Задача '{title}' обновлена.")
             else:
                 new_task = Task(
@@ -157,45 +161,44 @@ def manage_tasks():
                     desc=desc,
                     status=status,
                     priority=priority,
-                    assignee="system_user",
+                    assignee=assignee,
                     created=now,
                     updated=now,
                 )
-                tasks = add_task(tuple(tasks), new_task)
-                st.success(f"Задача '{title}' добавлена.")
+                tasks_all = add_task(tuple(tasks_all), new_task)
+                st.success(f"Задача '{title}' добавлена как {new_task.id}.")
 
-            data["tasks"] = [t.__dict__ for t in tasks]
-            save_data(data)
+            tasks_all = tuple(tasks_all)
+            persist_and_reload(data, tasks_all)
+            if current_user["role"] != "admin":
+                tasks_view = [t for t in tasks_all if t.assignee == current_user["id"]]
+            else:
+                tasks_view = list(tasks_all)
 
     st.subheader("Удалить задачу")
-    task_ids = [f"{t.id} | {t.title}" for t in tasks]
-    if task_ids:
-        selected = st.selectbox("Выберите задачу для удаления", task_ids)
+    if tasks_view:
+        remove_choice = st.selectbox("Выберите задачу для удаления", [f"{t.id} | {t.title}" for t in tasks_view])
         if st.button("Удалить"):
-            remove_id = selected.split(" | ")[0]
-            tasks = remove_task(tuple(tasks), remove_id)
-            data["tasks"] = [t.__dict__ for t in tasks]
-            save_data(data)
-            st.warning(f"Задача '{selected}' удалена!")
+            remove_id = remove_choice.split(" | ")[0]
+            tasks_all = remove_task(tuple(tasks_all), remove_id)
+            persist_and_reload(data, tasks_all)
+            st.warning(f"🗑 Задача {remove_id} удалена!")
+            if current_user["role"] != "admin":
+                tasks_view = [t for t in tasks_all if t.assignee == current_user["id"]]
+            else:
+                tasks_view = list(tasks_all)
     else:
         st.info("Нет задач для удаления")
 
     st.subheader("Текущие задачи")
     st.dataframe(
         [
-            {
-                "ID": t.id,
-                "Title": t.title,
-                "Status": t.status,
-                "Priority": t.priority,
-                "Assignee": t.assignee,
-                "Created": t.created,
-                "Updated": t.updated,
-            }
-            for t in tasks
+            {"ID": t.id, "Title": t.title, "Status": t.status, "Priority": t.priority, "Assignee": t.assignee}
+            for t in tasks_view
         ],
         use_container_width=True,
     )
+
 def page_reports():
     data, tasks = load_data()
     st.title("Reports")
