@@ -3,8 +3,12 @@ import json
 import uuid
 from datetime import datetime
 from pathlib import Path
-
+import random
+import time
 import sys
+
+from core.functional.pipelines import lazy_status_stream
+
 sys.path.append('F:/adk/core')
 
 from core.domain import Task
@@ -234,7 +238,133 @@ def page_reports():
         else:
             st.info("Нет просроченных задач")
 
+def page_lazy_demo():
+    st.title("Поток задач")
+    data_file = "data/seed.json"
+    with open(data_file, "r", encoding="utf-8") as f:
+        data = json.load(f)
 
+    tasks = tuple(
+        Task(
+            id=t["id"],
+            project_id=t["project_id"],
+            title=t["title"],
+            desc=t.get("desc", ""),
+            status=t.get("status", "todo"),
+            priority=t.get("priority", "low"),
+            assignee=t.get("assignee"),
+            created=t.get("created", datetime.now().strftime("%Y-%m-%d")),
+            updated=t.get("updated", datetime.now().strftime("%Y-%m-%d")),
+        )
+        for t in data.get("tasks", [])
+    )
+
+    st.subheader(f"Загружено задач: {len(tasks)}")
+
+    st.divider()
+
+    st.subheader("Онлайн-обновление статистики статусов")
+
+    output_area = st.empty()
+    stream = lazy_status_stream(tasks)
+    stats = {}
+
+    for status, count in stream:
+        stats[status] = count
+        output_area.write(
+            "\n".join([f"**{s}** — {c}" for s, c in stats.items()])
+        )
+        time.sleep(1.0)
+
+    st.success("Поток завершён!")
+
+def page_frp():
+
+    from core.frp import (
+        EventBus,
+        InProgressTasks,
+        CriticalBugs,
+        ActiveComments,
+    )
+
+    st.title("Async / FRP — EventBus Demo")
+
+    if "bus" not in st.session_state:
+        st.session_state.bus = EventBus()
+        st.session_state.in_progress = InProgressTasks(st.session_state.bus)
+        st.session_state.critical = CriticalBugs(st.session_state.bus)
+        st.session_state.comments = ActiveComments(st.session_state.bus)
+
+        st.session_state.event_log = []
+
+    bus = st.session_state.bus
+
+    st.subheader("Генерация событий")
+
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+        if st.button("Создать задачу"):
+            task = {
+                "id": random.randint(1000, 9999),
+                "title": "Новая задача",
+                "status": "IN_PROGRESS",
+                "priority": "LOW",
+                "type": "TASK",
+                "created": time.time(),
+            }
+            bus.publish("TASK_CREATED", task)
+            st.session_state.event_log.append(("TASK_CREATED", task))
+
+
+    with col2:
+        if st.button("Изменить статус задачи"):
+            if st.session_state.in_progress.tasks:
+                # Берём любую задачу в работе
+                t = next(iter(st.session_state.in_progress.tasks.values()))
+                t["status"] = "DONE"
+                bus.publish("STATUS_CHANGED", t)
+                st.session_state.event_log.append(("STATUS_CHANGED", t))
+            else:
+                st.warning("Нет задач в работе")
+
+    with col3:
+        if st.button("Создать критический баг"):
+            bug = {
+                "id": random.randint(5000, 9000),
+                "title": "Падение приложения",
+                "status": "IN_PROGRESS",
+                "priority": "CRITICAL",
+                "type": "BUG",
+            }
+            bus.publish("PRIORITY_CHANGED", bug)
+            st.session_state.event_log.append(("PRIORITY_CHANGED", bug))
+
+    with col4:
+        if st.button("Добавить комментарий"):
+            c = {"text": f"Комментарий {len(st.session_state.comments.comments) + 1}"}
+            bus.publish("COMMENT_ADDED", c)
+            st.session_state.event_log.append(("COMMENT_ADDED", c))
+
+    st.divider()
+
+    st.subheader("Витрины (Reactive Views)")
+
+    colA, colB = st.columns(2)
+
+    with colA:
+        st.markdown("### Задачи в работе")
+        st.write(st.session_state.in_progress.tasks)
+
+        st.markdown("### Критические баги")
+        st.write(st.session_state.critical.bugs)
+
+    with colB:
+        st.markdown("### Последние комментарии")
+        st.write(st.session_state.comments.comments)
+
+        st.markdown("### Лог событий")
+        st.write(st.session_state.event_log)
 
 
 def main():
@@ -243,16 +373,8 @@ def main():
     st.set_page_config(page_title="Трекер задач", layout="wide")
     login()
 
-    #css_path = Path(__file__).parent / "style.css"
-    #if css_path.exists():
-    #    with open(css_path, "r", encoding="utf-8") as f:
-    #        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-    #else:
-    #    st.warning("style.css не найден — помести файл рядом с main.py")
-
     st.sidebar.title("Навигация")
-    page = st.sidebar.radio("Перейти", ["Обзор", "Фильтры", "Управление задачами", "Отчеты"])
-
+    page = st.sidebar.radio("Перейти", ["Обзор", "Фильтры", "Управление задачами", "Отчеты", "Pypeline", "FRP"])
     if page == "Обзор":
         page_overview()
     elif page == "Фильтры":
@@ -273,7 +395,10 @@ def main():
                 for t in result
             ]
      )
-
+    elif page == "Pypeline":
+        page_lazy_demo()
+    elif page == "FRP":
+        page_frp()
 
 if __name__ == "__main__":
     main()
