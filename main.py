@@ -7,7 +7,6 @@ import random
 import time
 import sys
 
-from core.functional.pipelines import lazy_status_stream
 
 sys.path.append('F:/adk/core')
 
@@ -15,6 +14,10 @@ from core.domain import Task
 from core.filters import by_priority, by_assignee, by_date_range
 from core.transforms import filter_by_status, add_task, remove_task
 from core.reports import overdue_tasks, Rule
+
+from core.services import TaskService, StatusService, ReportService
+from core.reports import validate_task, overdue_tasks
+from core.functional.pipelines import create_pipeline, lazy_status_stream, compose, pipe
 
 
 
@@ -25,6 +28,18 @@ USERS = {
     "user1": {"role": "user", "id": "u_1"},
     "user2": {"role": "user", "id": "u_2"},
 }
+
+def local_css(file_name: str):
+    with open(file_name, "r", encoding="utf-8") as f:
+        css = f"<style>{f.read()}</style>"
+        st.markdown(css, unsafe_allow_html=True)
+
+    st.set_page_config(page_title="Трекер задач", page_icon="", layout="wide")
+
+    # ЗАГРУЗКА CSS
+    css_path = Path(__file__).parent / "styles.css"
+    local_css(css_path)
+
 
 def login():
     st.sidebar.title("Вход")
@@ -117,7 +132,7 @@ def manage_tasks():
     st.title("Управление задачами")
 
     if "user" not in st.session_state:
-        st.warning("⚠ Сначала войдите в систему.")
+        st.warning("Сначала войдите в систему.")
         return
     current_user = st.session_state["user"]
 
@@ -186,7 +201,7 @@ def manage_tasks():
             remove_id = remove_choice.split(" | ")[0]
             tasks_all = remove_task(tuple(tasks_all), remove_id)
             persist_and_reload(data, tasks_all)
-            st.warning(f"🗑 Задача {remove_id} удалена!")
+            st.warning(f"Задача {remove_id} удалена!")
             if current_user["role"] != "admin":
                 tasks_view = [t for t in tasks_all if t.assignee == current_user["id"]]
             else:
@@ -320,7 +335,6 @@ def page_frp():
     with col2:
         if st.button("Изменить статус задачи"):
             if st.session_state.in_progress.tasks:
-                # Берём любую задачу в работе
                 t = next(iter(st.session_state.in_progress.tasks.values()))
                 t["status"] = "DONE"
                 bus.publish("STATUS_CHANGED", t)
@@ -365,6 +379,134 @@ def page_frp():
 
         st.markdown("### Лог событий")
         st.write(st.session_state.event_log)
+
+
+def page_scenario():
+    st.title("Сценарий: Создать → Изменить статус → Отчёт")
+    data, tasks = load_data()
+    tasks = list(tasks)
+
+    task_service = TaskService(validators=[validate_task])
+    status_service = StatusService(updaters=[])
+    report_service = ReportService(aggregators=[])
+
+    st.header("Шаг 1 — Создание задачи")
+    with st.form("create_task_scenario"):
+        title = st.text_input("Заголовок")
+        desc = st.text_area("Описание")
+        priority = st.selectbox("Приоритет", ["низкий", "средний", "высокий", "критический"])
+        submitted = st.form_submit_button("Создать")
+
+    if submitted:
+        new_t = Task(
+            id=str(uuid.uuid4())[:8],
+            project_id="p1",
+            title=title,
+            desc=desc,
+            status="todo",
+            priority=priority,
+            assignee="u_admin",
+            created=datetime.now().strftime("%Y-%m-%d"),
+            updated=datetime.now().strftime("%Y-%m-%d"),
+        )
+
+        result = task_service.create_task(new_t)
+        if isinstance(result, dict):
+            st.error("Ошибка валидации: " + str(result))
+        else:
+            tasks.append(result)
+            data["tasks"] = [t._dict_ for t in tasks]
+            save_data(data)
+            st.success(f"Создано! ID: {result.id}")
+
+    st.divider()
+    st.header("Шаг 2 — Изменение статуса")
+    ids = [t.id for t in tasks]
+    selected = st.selectbox("Выберите задачу", ids)
+    new_status = st.selectbox("Новый статус", ["todo", "in_progress", "review", "done"])
+
+    if st.button("Изменить статус"):
+        task = next(t for t in tasks if t.id == selected)
+        updated = status_service.change_status(task, new_status)
+        updated.updated = datetime.now().strftime("%Y-%m-%d")
+        for i, t in enumerate(tasks):
+            if t.id == updated.id:
+                tasks[i] = updated
+        data["tasks"] = [t._dict_ for t in tasks]
+        save_data(data)
+        st.info(f"Статус обновлён: {updated.title} → {updated.status}")
+
+    st.divider()
+    st.header("Шаг 3 — Отчёт по проекту")
+    if st.button("Показать отчёт"):
+        report = report_service.project_report("p1")
+        st.json(report)
+        st.success("Отчёт готов!")
+
+
+import streamlit as st
+
+from core.domain import Task
+from core.services import TaskService
+from core.reports import agg_count_tasks, agg_by_status
+from core.functional.pipelines import save_task
+
+def page_lab7():
+
+    st.title("Лаба №7 — Фасады + Компоzиция")
+
+    # фасады
+    task_service = TaskService(validators=[])
+    status_service = StatusService(updaters=[save_task])
+    report_service = ReportService(aggregators=[agg_count_tasks, agg_by_status])
+
+    st.header("1) Создать задачу")
+
+    pid = st.text_input("Project ID", "p1")
+    title = st.text_input("Title", "")
+    desc = st.text_area("Description", "")
+
+    if st.button("Создать"):
+        t = Task(
+            id="t1",
+            project_id=pid,
+            title=title,
+            desc=desc,
+            status="new",
+            priority="normal",
+            assignee="none"
+        )
+
+        result = task_service.create_task(t)
+
+        if result.is_left:
+            st.error(result.value)
+        else:
+            save_task(result.value)
+            st.success("Создано!")
+
+    st.header("2) Изменить статус")
+
+    tid = st.text_input("Task ID", "t1")
+    new_status = st.selectbox("Новый статус", ["new", "in-progress", "done"])
+
+    if st.button("Обновить статус"):
+        from core.functional.pipelines import TASKS
+        tasks = TASKS.get(pid, [])
+        t = next((x for x in tasks if x.id == tid), None)
+        if not t:
+            st.error("Не найдено")
+        else:
+            t2 = status_service.change_status(t, new_status)
+            st.success(f"Статус изменён: {t2.status}")
+
+    st.header("3) Отчёт")
+
+    if st.button("Сформировать отчёт"):
+        rep = report_service.project_report(pid)
+        st.json(rep)
+
+
 
 
 def main():

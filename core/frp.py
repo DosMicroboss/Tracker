@@ -12,11 +12,9 @@ class EventBus:
         self.subscribers: Dict[str, List[Callable[[Event], None]]] = {}
 
     def subscribe(self, name: str, handler: Callable[[Event], None]):
-        """Регистрирует подписчика на событие."""
         self.subscribers.setdefault(name, []).append(handler)
 
     def publish(self, name: str, payload: dict):
-        """Публикует событие всем подписчикам."""
         event = Event(name, payload)
         for handler in self.subscribers.get(name, []):
             handler(event)
@@ -68,6 +66,5 @@ class ActiveComments:
     def on_comment(self, event: Event):
         self.comments.append(event.payload)
 
-        # Храним только последние N
         if len(self.comments) > self.limit:
             self.comments = self.comments[-self.limit:]

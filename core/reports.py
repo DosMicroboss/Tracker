@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from core.domain import Task
 from core.functional.maybe import Maybe
 from core.functional.either import Either
+from core.functional.pipelines import TASKS
 
 class Rule:
     def __init__(self, max_days: int = 1):
@@ -50,3 +51,15 @@ def create_pipeline(tasks: tuple[Task, ...], t: Task, rules: tuple[Rule, ...]):
         validate_task(t, rules)
         .map(lambda valid_task: tasks + (valid_task,))
     )
+
+
+
+
+def agg_count_tasks(project_id: str) -> dict:
+    return {"tasks_total": len(TASKS.get(project_id, []))}
+
+def agg_by_status(project_id: str) -> dict:
+    stats = {}
+    for t in TASKS.get(project_id, []):
+        stats[t.status] = stats.get(t.status, 0) + 1
+    return {"status_stats": stats}

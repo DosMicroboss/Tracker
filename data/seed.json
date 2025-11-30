@@ -158,15 +158,26 @@
       "updated": "2025-10-14"
     },
     {
-      "id": "f5b3bd0c",
+      "id": "517f4908",
       "project_id": "p1",
-      "title": "",
+      "title": "Мат-стат рк",
+      "desc": "Мат стат тапсыру омагад",
+      "status": "todo",
+      "priority": "высокий",
+      "assignee": "u_2",
+      "created": "2025-11-26",
+      "updated": "2025-11-26"
+    },
+    {
+      "id": "d537bb79",
+      "project_id": "p1",
+      "title": "Функциональное программирование 7-лаба",
       "desc": "",
       "status": "todo",
-      "priority": "низкий",
-      "assignee": "",
-      "created": "2025-11-25",
-      "updated": "2025-11-25"
+      "priority": "высокий",
+      "assignee": "u_1",
+      "created": "2025-11-30",
+      "updated": "2025-11-30"
     }
   ],
   "comments": [
