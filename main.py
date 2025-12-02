@@ -29,6 +29,10 @@ from core.reports import (
     report_count_by_status
 )
 from core.functional.pipelines import update_status
+from dataclasses import replace
+from core.domain import with_status
+
+
 
 DATA_PATH = Path(__file__).parent.parent / "data" / "seed.json"
 
@@ -407,6 +411,19 @@ def page_functional_core():
     # --------------------------
     # ИНИЦИАЛИЗАЦИЯ СЕРВИСОВ
     # --------------------------
+
+    if "user" not in st.session_state:
+        st.warning("Сначала войдите в систему.")
+        return
+    current_user = st.session_state["user"]
+
+    if current_user["role"] != "admin":
+        tasks_view = [t for t in tasks_all if t.assignee == current_user["id"]]
+    else:
+        tasks_view = list(tasks_all)
+
+
+
     if "task_service" not in st.session_state:
         st.session_state.task_service = TaskService(
             validators=[validate_task],
@@ -415,7 +432,7 @@ def page_functional_core():
 
     if "status_service" not in st.session_state:
         st.session_state.status_service = StatusService(
-            updaters=[update_status]
+            updaters=[with_status]
         )
 
     if "report_service" not in st.session_state:
@@ -480,7 +497,13 @@ def page_functional_core():
         if st.button("Обновить статус"):
             task = next(t for t in tasks_all if t.id == tid)
             updated = ss.change_status(task, new_status)
-            updated.updated = datetime.now().strftime("%Y-%m-%d")
+            # создаём новый объект Task с обновлённым полем 'updated'
+            updated = replace(updated, updated=datetime.now().strftime("%Y-%m-%d"))
+
+            tasks_all = tuple(t if t.id != tid else updated for t in tasks_all)
+            persist_and_reload(data, tasks_all)
+
+            st.success(f"Статус обновлён: {tid} → {new_status}")
 
             tasks_all = tuple(t if t.id != tid else updated for t in tasks_all)
             persist_and_reload(data, tasks_all)
@@ -497,8 +520,29 @@ def page_functional_core():
         report = rs.project_report(pid)
         st.json(report)
 
+    st.subheader("Удалить задачу")
+    if tasks_view:
+        remove_choice = st.selectbox("Выберите задачу для удаления", [f"{t.id} | {t.title}" for t in tasks_view])
+        if st.button("Удалить"):
+            remove_id = remove_choice.split(" | ")[0]
+            tasks_all = remove_task(tuple(tasks_all), remove_id)
+            persist_and_reload(data, tasks_all)
+            st.warning(f"Задача {remove_id} удалена!")
+            if current_user["role"] != "admin":
+                tasks_view = [t for t in tasks_all if t.assignee == current_user["id"]]
+            else:
+                tasks_view = list(tasks_all)
+    else:
+        st.info("Нет задач для удаления")
 
-
+    st.subheader("Текущие задачи")
+    st.dataframe(
+        [
+            {"ID": t.id, "Title": t.title, "Status": t.status, "Priority": t.priority, "Assignee": t.assignee}
+            for t in tasks_view
+        ],
+        use_container_width=True,
+    )
 
 
 def main():

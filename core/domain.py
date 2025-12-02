@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 import time
 
+
 @dataclass(frozen=True)
 class Project:
     id: str
@@ -53,15 +54,19 @@ class Rule:
     payload: dict
 
 
-def with_status(self, new_status):
+# -----------------------------
+#  Правильный updater-функционал
+# -----------------------------
+def with_status(task: Task, new_status: str) -> Task:
+    """Функция-трансформер: возвращает новую задачу с обновлённым статусом."""
     return Task(
-        id=self.id,
-        project_id=self.project_id,
-        title=self.title,
-        desc=self.desc,
+        id=task.id,
+        project_id=task.project_id,
+        title=task.title,
+        desc=task.desc,
         status=new_status,
-        priority=self.priority,
-        assignee=self.assignee,
-        created=self.created,
-        updated=time.time()
+        priority=task.priority,
+        assignee=task.assignee,
+        created=task.created,
+        updated=time.time(),
     )
