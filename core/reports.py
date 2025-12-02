@@ -31,7 +31,7 @@ class Rule:
         return RuleResult(True)
 
 
-@lru_cache(maxsize=None)
+#@lru_cache(maxsize=None)
 def overdue_tasks(tasks: tuple[Task, ...], rules: tuple[Rule, ...], index: int = 0) -> tuple[Task, ...]:
     if index >= len(tasks):
         return ()

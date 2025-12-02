@@ -15,7 +15,6 @@ from core.filters import by_priority, by_assignee, by_date_range
 from core.transforms import filter_by_status, add_task, remove_task
 from core.reports import overdue_tasks, Rule
 
-from core.reports import validate_task, overdue_tasks
 from core.functional.pipelines import create_pipeline, lazy_status_stream, compose, pipe
 
 import streamlit as st
@@ -28,7 +27,6 @@ from core.reports import (
     overdue_tasks,
     report_count_by_status
 )
-from core.functional.pipelines import update_status
 from dataclasses import replace
 from core.domain import with_status
 
@@ -389,12 +387,12 @@ def page_frp():
         st.write(st.session_state.event_log)
 
 
-# pages/page_functional_core.py
+# 7 лаба
 
 def page_functional_core():
 
 
-    st.title("Functional Core / Pipelines / Reports")
+    st.title("Управление задачами")
 
     # --------------------------
     # Загружаем данные
@@ -441,7 +439,7 @@ def page_functional_core():
                 lambda pid: {"count_by_status":
                              report_count_by_status(tasks_all)},
                 lambda pid: {"overdue":
-                             [t.id for t in overdue_tasks(tasks_all, st.session_state.rules)]}
+                                 [t.id for t in overdue_tasks(tasks_all,[tuple(r) if isinstance(r, list) else r for r in st.session_state.rules])]}
             ]
         )
 
@@ -458,7 +456,13 @@ def page_functional_core():
     desc = st.text_area("Описание")
     status = st.selectbox("Статус", ["todo", "in_progress", "review", "done"])
     priority = st.selectbox("Приоритет", ["низкий", "средний", "высокий", "критический"])
-    assignee = st.text_input("Исполнитель (user_id)")
+
+    # вот здесь вставляем проверку роли
+    if current_user["role"] == "admin":
+        assignee = st.text_input("Исполнитель (user_id)")
+    else:
+        assignee = current_user["id"]
+        st.text_input("Исполнитель (user_id)", value=assignee, disabled=True)
 
     if st.button("Создать задачу"):
         now = datetime.now().strftime("%Y-%m-%d")
@@ -552,13 +556,13 @@ def main():
     login()
 
     st.sidebar.title("Навигация")
-    page = st.sidebar.radio("Перейти", ["Обзор", "Фильтры", "Управление задачами", "Отчеты", "Pypeline", "FRP", "Laba7"])
+    page = st.sidebar.radio("Перейти", ["Обзор", "Фильтры", "Управление задачами", "Отчеты", "Pypeline", "FRP"])
     if page == "Обзор":
         page_overview()
     elif page == "Фильтры":
         page_filters()
     elif page == "Управление задачами":
-        manage_tasks()
+        page_functional_core()
     elif page == "Отчеты":
         from core.reports import overdue_tasks, Rule
         _, tasks = load_data()
@@ -577,8 +581,7 @@ def main():
         page_lazy_demo()
     elif page == "FRP":
         page_frp()
-    elif page == "Laba7":
-        page_functional_core()
+
 
 if __name__ == "__main__":
     main()

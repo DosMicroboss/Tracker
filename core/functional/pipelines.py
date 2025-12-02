@@ -45,7 +45,7 @@ def lazy_status_stream(tasks: Iterable[Task]):
         time.sleep(0.1)  # имитация обновления
 
 
-TASKS: dict[str, list[Task]] = {}   # project_id → list[Task]
+TASKS: dict[str, list[Task]] = {}
 
 def save_task(t: Task):
     TASKS.setdefault(t.project_id, []).append(t)
@@ -54,7 +54,7 @@ def save_task(t: Task):
 
 from core.domain import Task
 
-TASKS: dict[str, list[Task]] = {}   # project_id → list[Task]
+TASKS: dict[str, list[Task]] = {}
 
 def save_task(t: Task):
     TASKS.setdefault(t.project_id, []).append(t)

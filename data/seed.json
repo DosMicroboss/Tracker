@@ -74,11 +74,11 @@
       "project_id": "p1",
       "title": "ООП лабараторка 3 лаба и 4 лаба",
       "desc": "",
-      "status": "done",
+      "status": "todo",
       "priority": "низкий",
       "assignee": "",
       "created": "2025-10-06",
-      "updated": "2025-10-14"
+      "updated": "2025-12-03"
     },
     {
       "id": "046008e1",
@@ -178,6 +178,17 @@
       "assignee": "u_1",
       "created": "2025-11-30",
       "updated": "2025-11-30"
+    },
+    {
+      "id": "d2dae13f",
+      "project_id": "p1",
+      "title": "12356",
+      "desc": "sgdg",
+      "status": "todo",
+      "priority": "высокий",
+      "assignee": "u_1",
+      "created": "2025-12-03",
+      "updated": "2025-12-03"
     }
   ],
   "comments": [
