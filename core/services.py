@@ -17,14 +17,11 @@ class TaskService:
         self.rules = rules
 
     def create_task(self, task: Task) -> Either:
-        """
-        Прогоняет задачу через все валидаторы, возвращает Either.
-        """
         for validate in self.validators:
             res = validate(task, self.rules)
-            if res.is_left:
-                return res  # ошибки валидации
-            task = res.value  # берем обновлённый Task (если валидатор его изменит)
+            if not res.is_right:  # <-- исправлено
+                return res
+            task = res.value
 
         return Either.right(task)
 

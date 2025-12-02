@@ -178,6 +178,17 @@
       "assignee": "u_1",
       "created": "2025-11-30",
       "updated": "2025-11-30"
+    },
+    {
+      "id": "04d1cdb4",
+      "project_id": "p1",
+      "title": "",
+      "desc": "",
+      "status": "todo",
+      "priority": "низкий",
+      "assignee": "",
+      "created": "2025-12-03",
+      "updated": "2025-12-03"
     }
   ],
   "comments": [

@@ -9,6 +9,10 @@ class Either(Generic[E, T]):
         self.is_right = is_right
         self.value = value
 
+    @property
+    def is_left(self) -> bool:
+        return not self.is_right
+
     @staticmethod
     def right(value: T) -> "Either[E, T]":
         return Either(True, value)
