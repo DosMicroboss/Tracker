@@ -35,11 +35,7 @@ def pipe(value: Any, *functions: Callable) -> Any:
         value = f(value)
     return value
 
-# -------------------------
-# Lazy status stream (для пайплайна)
-# -------------------------
 def lazy_status_stream(tasks: Iterable[Task]):
-    """Генерирует статус-стрим в стиле FRP/ленивый"""
     stats = {}
     statuses = ["todo", "in_progress", "review", "done"]
     for t in tasks:
@@ -55,3 +51,38 @@ def save_task(t: Task):
     TASKS.setdefault(t.project_id, []).append(t)
     return t
 
+
+from core.domain import Task
+
+TASKS: dict[str, list[Task]] = {}   # project_id → list[Task]
+
+def save_task(t: Task):
+    TASKS.setdefault(t.project_id, []).append(t)
+    return t
+
+
+from datetime import datetime
+from core.domain import Task
+
+def update_status(tasks: tuple[Task, ...], tid: str, new_status: str) -> tuple[Task, ...]:
+    updated_tasks = []
+
+    now = datetime.now().strftime("%Y-%m-%d")
+
+    for t in tasks:
+        if t.id == tid:
+            updated_tasks.append(Task(
+                id=t.id,
+                project_id=t.project_id,
+                title=t.title,
+                desc=t.desc,
+                status=new_status,
+                priority=t.priority,
+                assignee=t.assignee,
+                created=t.created,
+                updated=now
+            ))
+        else:
+            updated_tasks.append(t)
+
+    return tuple(updated_tasks)

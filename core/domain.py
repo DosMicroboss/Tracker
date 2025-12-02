@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Optional
-
+import time
 
 @dataclass(frozen=True)
 class Project:
@@ -51,3 +51,17 @@ class Rule:
     id: str
     kind: str
     payload: dict
+
+
+def with_status(self, new_status):
+    return Task(
+        id=self.id,
+        project_id=self.project_id,
+        title=self.title,
+        desc=self.desc,
+        status=new_status,
+        priority=self.priority,
+        assignee=self.assignee,
+        created=self.created,
+        updated=time.time()
+    )

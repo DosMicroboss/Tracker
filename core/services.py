@@ -1,82 +1,62 @@
-# core/services/services.py
-
+# core/services.py
+from __future__ import annotations
+from typing import Callable, Iterable
+from core.domain import Task
 from core.functional.either import Either
 
 
-# ============================================================
-#                 TaskService
-# ============================================================
-
 class TaskService:
     """
-    TaskService — фасад над функциональными валидаторами.
-    validators: [validator(Task) -> Either[error, Task]]
+    Фасад создания задач.
+    validators: список функций (task, rules) -> Either[errors, Task]
+    rules: правила валидации
     """
 
-    def __init__(self, validators: list):
+    def __init__(self, validators: list[Callable], rules):
         self.validators = validators
+        self.rules = rules
 
-    def create_task(self, task) -> Either:
+    def create_task(self, task: Task) -> Either:
         """
-        Прогоняет задачу через все валидаторы.
-        Возвращает Either[error, Task]
+        Прогоняет задачу через все валидаторы, возвращает Either.
         """
-        result = None
-        for validator in self.validators:
-            result = validator(task)
-            if result.is_left():
-                return result
-            task = result.get()  # подхватываем обновлённый Task (если валидатор что-то меняет)
+        for validate in self.validators:
+            res = validate(task, self.rules)
+            if res.is_left:
+                return res  # ошибки валидации
+            task = res.value  # берем обновлённый Task (если валидатор его изменит)
 
-        return result
+        return Either.right(task)
 
-
-# ============================================================
-#                 StatusService
-# ============================================================
 
 class StatusService:
     """
-    StatusService — фасад для смены статуса задачи.
-    updaters: [update_fn(task, new_status) -> Task]
+    Изменение статуса задач.
+    updaters: список функций (task, new_status) -> Task
     """
 
-    def __init__(self, updaters: list):
+    def __init__(self, updaters: list[Callable]):
         self.updaters = updaters
 
-    def change_status(self, task, new_status: str):
-        """
-        Последовательно применяет все update-функции.
-        """
-        updated = task
-        for upd in self.updaters:
-            updated = upd(updated, new_status)
+    def change_status(self, task: Task, status: str) -> Task:
+        for updater in self.updaters:
+            task = updater(task, status)
+        return task
 
-        return updated
-
-
-# ============================================================
-#                 ReportService
-# ============================================================
 
 class ReportService:
     """
-    ReportService — фасад для сборки отчётов.
-    aggregators: [agg(project_id) -> dict]
+    Агрегация отчётов.
+    aggregators: список функций (project_id) -> dict
     """
 
-    def __init__(self, aggregators: list):
+    def __init__(self, aggregators: list[Callable]):
         self.aggregators = aggregators
 
     def project_report(self, project_id: str) -> dict:
-        """
-        Объединяет результаты всех агрегаторов в один dict.
-        """
-        report = {}
-
+        result = {}
         for agg in self.aggregators:
-            data = agg(project_id)
-            if isinstance(data, dict):
-                report.update(data)
-
-        return report
+            part = agg(project_id)
+            if isinstance(part, dict):
+                result.update(part)
+        return result

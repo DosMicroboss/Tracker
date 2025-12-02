@@ -5,9 +5,30 @@ from core.functional.maybe import Maybe
 from core.functional.either import Either
 from core.functional.pipelines import TASKS
 
+
+class RuleResult:
+    def __init__(self, ok: bool, msg: str = ""):
+        self.ok = ok
+        self.msg = msg
+
+
 class Rule:
     def __init__(self, max_days: int = 1):
         self.max_days = max_days
+        self.name = "max_days_rule"
+
+    def check(self, t: Task) -> RuleResult:
+        try:
+            updated_date = datetime.strptime(t.updated, "%Y-%m-%d")
+        except Exception:
+            return RuleResult(False, "Invalid updated date format (YYYY-MM-DD required)")
+
+        days = (datetime.now() - updated_date).days
+
+        if days > self.max_days and t.status != "done":
+            return RuleResult(False, f"Task overdue by {days - self.max_days} days")
+
+        return RuleResult(True)
 
 
 @lru_cache(maxsize=None)
@@ -46,20 +67,14 @@ def validate_task(t: Task, rules: tuple[Rule, ...]) -> Either[dict, Task]:
         return Either.left(errors)
     return Either.right(t)
 
+
 def create_pipeline(tasks: tuple[Task, ...], t: Task, rules: tuple[Rule, ...]):
     return (
         validate_task(t, rules)
         .map(lambda valid_task: tasks + (valid_task,))
     )
-
-
-
-
-def agg_count_tasks(project_id: str) -> dict:
-    return {"tasks_total": len(TASKS.get(project_id, []))}
-
-def agg_by_status(project_id: str) -> dict:
-    stats = {}
-    for t in TASKS.get(project_id, []):
-        stats[t.status] = stats.get(t.status, 0) + 1
-    return {"status_stats": stats}
+def report_count_by_status(tasks: tuple[Task, ...]) -> dict:
+    counts = {}
+    for t in tasks:
+        counts[t.status] = counts.get(t.status, 0) + 1
+    return counts
