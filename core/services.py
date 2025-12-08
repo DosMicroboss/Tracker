@@ -6,6 +6,16 @@ from core.functional.either import Either
 import inspect
 from core.async_ops import bulk_update_status, project_overview_async
 
+
+from pathlib import Path
+import json
+
+def load_tasks(path: Path):
+    with path.open("r", encoding="utf-8") as f:
+        data = json.load(f)
+    return tuple(data["tasks"])        # иммутабельные данные
+
+
 class TaskService:
     """
     Фасад создания задач.

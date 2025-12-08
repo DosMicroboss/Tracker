@@ -389,9 +389,6 @@ def page_frp():
         st.markdown("### Лог событий")
         st.write(st.session_state.event_log)
 
-
-# 7 лаба
-
 def page_functional_core():
     st.title("Управление задачами")
 
@@ -534,11 +531,6 @@ def page_functional_core():
         ],
         use_container_width=True,
     )
-
-
-
-import streamlit as st
-import asyncio
 
 def page_async_demo():
     st.markdown("""
