@@ -4,6 +4,7 @@ from typing import Callable, Iterable
 from core.domain import Task
 from core.functional.either import Either
 import inspect
+from core.async_ops import bulk_update_status, project_overview_async
 
 class TaskService:
     """

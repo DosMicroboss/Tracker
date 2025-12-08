@@ -6,7 +6,10 @@ from pathlib import Path
 import random
 import time
 import sys
+import asyncio
 
+from core.async_ops import project_overview_async, bulk_update_status
+from core.frp import EventBus, Event
 
 sys.path.append('F:/adk/core')
 
@@ -390,8 +393,6 @@ def page_frp():
 # 7 лаба
 
 def page_functional_core():
-
-
     st.title("Управление задачами")
 
     # --------------------------
@@ -399,16 +400,9 @@ def page_functional_core():
     # --------------------------
     data, tasks_all = load_data()
 
-    # --------------------------
-    # Правила
-    # --------------------------
     if "rules" not in st.session_state:
-        # правило по умолчанию: просроченная задача если не обновлялась 1 день
         st.session_state.rules = (Rule(max_days=1),)
 
-    # --------------------------
-    # ИНИЦИАЛИЗАЦИЯ СЕРВИСОВ
-    # --------------------------
 
     if "user" not in st.session_state:
         st.warning("Сначала войдите в систему.")
@@ -488,9 +482,6 @@ def page_functional_core():
             persist_and_reload(data, tasks_all)
             st.success(f"Задача создана: {result.value.id}")
 
-    # -------------------------------------
-    # 2. Изменить статус
-    # -------------------------------------
     st.subheader("Изменить статус")
 
     if tasks_all:
@@ -501,7 +492,7 @@ def page_functional_core():
         if st.button("Обновить статус"):
             task = next(t for t in tasks_all if t.id == tid)
             updated = ss.change_status(task, new_status)
-            # создаём новый объект Task с обновлённым полем 'updated'
+
             updated = replace(updated, updated=datetime.now().strftime("%Y-%m-%d"))
 
             tasks_all = tuple(t if t.id != tid else updated for t in tasks_all)
@@ -513,10 +504,6 @@ def page_functional_core():
             persist_and_reload(data, tasks_all)
 
             st.success(f"Статус обновлён: {tid} → {new_status}")
-
-    # -------------------------------------
-    # 3. Отчёт
-    # -------------------------------------
     st.subheader("Отчёт по проекту")
 
     pid = st.text_input("Project ID", "p1")
@@ -549,6 +536,100 @@ def page_functional_core():
     )
 
 
+
+import streamlit as st
+import asyncio
+
+def page_async_demo():
+    st.markdown("""
+        <style>
+            .card {
+                padding: 20px;
+                border-radius: 14px;
+                border: 1px solid rgba(180,180,180,0.35);
+                margin: 15px 0;
+                background: rgba(250,250,250,0.85);
+            }
+            .card h3 {
+                margin-top: 0;
+                font-size: 1.4rem;
+            }
+            .metric-block {
+                display: flex;
+                gap: 25px;
+                margin-bottom: 15px;
+            }
+            .metric {
+                background: #f1f3f5;
+                padding: 14px 18px;
+                border-radius: 10px;
+                font-size: 1rem;
+                text-align: center;
+                min-width: 130px;
+                border: 1px solid #e0e0e0;
+            }
+            .metric span {
+                display: block;
+                font-size: 1.3rem;
+                font-weight: bold;
+                margin-top: 4px;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+
+    st.title("Async Operations Demo")
+    st.caption("Асинхронные операции: массовые обновления и быстрый анализ данных")
+
+    data, tasks = load_data()
+    users = data.get("users", USERS)
+
+    st.markdown('<div class="metric-block">', unsafe_allow_html=True)
+    st.markdown(f'<div class="metric">Задач<span>{len(tasks)}</span></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="metric">Пользователей<span>{len(users)}</span></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="metric">Проектов<span>{len({t.project_id for t in tasks})}</span></div>', unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.markdown("Массовое обновление статуса")
+
+    status_options = ["todo", "in_progress", "review", "done"]
+    new_status = st.selectbox("Выберите новый статус:", status_options)
+
+    if st.button("Обновить все задачи"):
+        with st.spinner("Обновление выполняется..."):
+            async def do_bulk_update():
+                updated = await bulk_update_status(list(tasks), new_status)
+
+                data["tasks"] = [t.__dict__ for t in updated]
+                save_data(data)
+
+                st.success(f"Готово! Обновлено {len(updated)} задач")
+                st.dataframe(
+                    [{"ID": t.id, "Title": t.title, "Status": t.status} for t in updated],
+                    use_container_width=True
+                )
+            asyncio.run(do_bulk_update())
+    st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.markdown("Асинхронный отчёт по проекту")
+
+    if st.button("Показать статистику"):
+        with st.spinner("Считаем..."):
+            async def do_overview():
+                overview = await project_overview_async(list(tasks), users)
+                st.json(overview)
+                st.markdown("Статусы")
+                cols = st.columns(len(overview["by_status"]))
+                for (status, count), col in zip(overview["by_status"].items(), cols):
+                    col.metric(status, count)
+                st.markdown("Исполнители")
+                st.dataframe(
+                    [{"Assignee": name, "Tasks": cnt} for name, cnt in overview["by_assignee"].items()],
+                    use_container_width=True
+                )
+            asyncio.run(do_overview())
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
 def main():
     st.set_page_config(page_title="Трекер задач", page_icon="", layout="wide")
 
@@ -556,7 +637,7 @@ def main():
     login()
 
     st.sidebar.title("Навигация")
-    page = st.sidebar.radio("Перейти", ["Обзор", "Фильтры", "Управление задачами", "Отчеты", "Pypeline", "FRP"])
+    page = st.sidebar.radio("Перейти", ["Обзор", "Фильтры", "Управление задачами", "Отчеты", "Pypeline", "FRP", "Async"])
     if page == "Обзор":
         page_overview()
     elif page == "Фильтры":
@@ -581,7 +662,8 @@ def main():
         page_lazy_demo()
     elif page == "FRP":
         page_frp()
-
+    elif page == "Async":
+        page_async_demo()
 
 if __name__ == "__main__":
     main()
